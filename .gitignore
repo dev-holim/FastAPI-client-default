@@ -1,0 +1,91 @@
+# ----------------------
+# Python 기본 캐시/빌드
+# ----------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Cython 빌드 결과
+*.c
+*.cpp
+*.egg-info/
+
+# ----------------------
+# 가상환경/패키지
+# ----------------------
+.venv/
+venv/
+ENV/
+env/
+.env
+.uv/
+.conda/
+*.egg
+.eggs/
+
+# ----------------------
+# 패키지 매니저 캐시
+# ----------------------
+pip-wheel-metadata/
+pip-log.txt
+poetry.lock
+Pipfile.lock
+*.whl
+
+# ----------------------
+# FastAPI/Uvicorn 실행 관련
+# ----------------------
+# uvicorn이나 gunicorn 실행시 만들어질 수 있는 파일들
+*.log
+*.pid
+
+# ----------------------
+# 데이터/캐시
+# ----------------------
+instance/
+*.db
+*.sqlite3
+*.sqlite
+*.sqlite-journal
+
+# ----------------------
+# IDE / 에디터
+# ----------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+
+# ----------------------
+# 테스트/커버리지
+# ----------------------
+.coverage
+.coverage.*
+.cache
+htmlcov/
+.tox/
+.pytest_cache/
+
+# ----------------------
+# Docker
+# ----------------------
+*.pid
+*.seed
+*.tar
+*.bak
+docker-compose.override.yml
+
+# ----------------------
+# 기타
+# ----------------------
+dist/
+build/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+.cursor
