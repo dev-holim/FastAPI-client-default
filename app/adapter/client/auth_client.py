@@ -30,21 +30,31 @@ class AuthClient(Auth):
 
     async def register(self, payload: dict):
         # TODO: payload 검증 필요
-        return await self.http_post(
-            f"{self.auth_host}/users/sign-up",
-            json=payload
-        )
+        try:
+            return await self.http_post(
+                f"{self.auth_host}/users/sign-up",
+                json=payload
+            )
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 409:
+                raise HTTPException(status_code=409, detail="이미 존재하는 사용자입니다.")
+            raise e
 
     async def refresh(self, refresh_token: str, client_id: str):
         # TODO: client_id 검증 필요
-        async with httpx.AsyncClient(timeout=self.timeout) as c:
-            r = await c.post(f"{self.auth_host}/oauth/token", data={
-                "grant_type":"refresh_token",
-                "refresh_token": refresh_token,
-                "client_id": client_id
-            })
-        r.raise_for_status()
-        return r.json()
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as c:
+                r = await c.post(f"{self.auth_host}/oauth/token", data={
+                    "grant_type":"refresh_token",
+                    "refresh_token": refresh_token,
+                    "client_id": client_id
+                })
+            r.raise_for_status()
+            return r.json()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 400:
+                raise HTTPException(status_code=400, detail="리프레시 토큰이 만료되었거나 유효하지 않습니다.")
+            raise e
 
     def verify_token(self, token: str):
         jwks_client = PyJWKClient(f"{self.auth_host}/.well-known/jwks.json")

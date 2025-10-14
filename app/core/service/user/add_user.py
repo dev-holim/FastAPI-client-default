@@ -1,6 +1,5 @@
 from fastapi import Depends
 
-from app import settings
 from app.abc.repository.base import UoW
 from app.adapter.client.auth_client import AuthClient
 from app.adapter.client.jwt_encoder import JWTEncoder
@@ -36,14 +35,14 @@ class AddUserService(Service):
         self.auth_client = auth_client
 
     async def __call__(self, name: str, email: str, password: str):
-        token, _ = self.jwt_client.access_token()
+        app_token, _ = self.jwt_client.access_token()
 
         return await self.auth_client.register(
             {
                 "name": name,
                 "email": email,
                 "password": password,
-                "token": token
+                "app_token": app_token
             }
         )
 
