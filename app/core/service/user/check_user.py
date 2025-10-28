@@ -32,7 +32,7 @@ class CheckUserService(Service):
         self.cache_uow = cache_uow
 
     async def __call__(self, user_id: str) -> UserLoginStatus:
-        async with self.cache_uow.enter() as cache_uow:
+        async with self.cache_uow.enter(transactional=False) as cache_uow: # redis 조회는 transactional 필요 없음
             if _ := await cache_uow.user_token_repo.get_user_hash(user_id):
                 return UserLoginStatus.LOGIN
 

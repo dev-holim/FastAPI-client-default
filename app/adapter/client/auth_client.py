@@ -7,7 +7,8 @@ from app.config import settings
 
 class AuthClient(Auth):
     def __init__(self):
-        self.auth_host = settings.jwt.AUTH_HOST
+        self.auth_host = settings.auth.HOST
+        self.algorithm = settings.auth.ALGORITHM
         self.timeout = httpx.Timeout(5.0, connect=2.0)
 
     async def http_request(self, method: str, url: str, **kwargs):
@@ -17,10 +18,26 @@ class AuthClient(Auth):
         return r.json()
 
     async def http_post(self, url: str, data: dict = None, json: dict = None, **kwargs):
-        async with httpx.AsyncClient(timeout=self.timeout) as c:
-            r = await c.post(url, data=data, json=json, **kwargs)
-        r.raise_for_status()
-        return r.json()
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as c:
+                r = await c.post(url, data=data, json=json, **kwargs)
+            r.raise_for_status()
+            return r.json()
+        except httpx.HTTPStatusError as e:
+            detail_result = e.response.json().get("detail", None)
+            if not detail_result:
+                detail_msg = "Authentication service error"
+            elif isinstance(detail_result, list):
+                detail_msg = "; ".join([d.get("msg", "Authentication service error") for d in detail_result])
+            elif isinstance(detail_result, str):
+                detail_msg = detail_result
+            else:
+                detail_msg = detail_result.get("detail", "Authentication service error")
+
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=detail_msg
+            )
 
     async def login(self, email: str, password: str):
         return await self.http_post(
@@ -29,32 +46,16 @@ class AuthClient(Auth):
         )
 
     async def register(self, payload: dict):
-        # TODO: payload 검증 필요
-        try:
-            return await self.http_post(
-                f"{self.auth_host}/users/sign-up",
-                json=payload
-            )
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 409:
-                raise HTTPException(status_code=409, detail="이미 존재하는 사용자입니다.")
-            raise e
+        return await self.http_post(
+            f"{self.auth_host}/users/sign-up",
+            json=payload
+        )
 
-    async def refresh(self, refresh_token: str, client_id: str):
-        # TODO: client_id 검증 필요
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as c:
-                r = await c.post(f"{self.auth_host}/oauth/token", data={
-                    "grant_type":"refresh_token",
-                    "refresh_token": refresh_token,
-                    "client_id": client_id
-                })
-            r.raise_for_status()
-            return r.json()
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 400:
-                raise HTTPException(status_code=400, detail="리프레시 토큰이 만료되었거나 유효하지 않습니다.")
-            raise e
+    async def refresh(self, refresh_token: str):
+        return await self.http_post(
+            f"{self.auth_host}/users/refresh-token",
+            json={"refresh_token": refresh_token}
+        )
 
     def verify_token(self, token: str):
         jwks_client = PyJWKClient(f"{self.auth_host}/.well-known/jwks.json")
@@ -66,7 +67,7 @@ class AuthClient(Auth):
             payload = decode(
                 token,
                 signing_key.key,
-                algorithms=["RS256"],
+                algorithms=[self.algorithm],
                 audience="https://api.local",
                 issuer="https://auth.local"
             )

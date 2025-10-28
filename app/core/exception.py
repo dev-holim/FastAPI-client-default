@@ -14,7 +14,7 @@ class ExceptionDetail(str, Enum):
 
     # Token
     TOKEN_NOT_FOUND = 'TOKEN_NOT_FOUND'
-    INVALID_TOKEN_NO_SUFFIx = 'INVALID_TOKEN_NO_SUFFIx'
+    INVALID_TOKEN_NO_SUFFIX = 'INVALID_TOKEN_NO_SUFFIX'
 
 
 class DefaultException(HTTPException):
@@ -46,6 +46,4 @@ FORBIDDEN_EXCEPTION = DefaultException(403)
 NOT_FOUND_EXCEPTION = DefaultException(404)
 ALREADY_EXIST_EXCEPTION = DefaultException(409)
 UNPROCESSABLE_ENTITY = DefaultException(422)
-INTERNAL_SERVER_ERROR = DefaultException(500)
-
 INTERNAL_SERVER_ERROR = DefaultException(500)

@@ -8,8 +8,14 @@ class DefaultResponse(BaseModel):
 class SignUpResponse(DefaultResponse):
     ...
 
-class SignInResponse(BaseModel):
+class JWTTokenData(BaseModel):
     access_token: str
     refresh_token: str
     access_expired_at: float
     refresh_expired_at: float
+
+class SignInResponse(JWTTokenData):
+    ...
+
+class RefreshTokenResponse(JWTTokenData):
+    ...

@@ -11,29 +11,15 @@ from .._base_ import Service
 from app.core.enums import UserRole
 
 
-class AddUserService(Service):
+class VerifyRefreshTokenService(Service):
 
     def __init__(
             self,
-            rdb_uow: UoW = Depends(
-                RDBUoW(
-                    repositories=[
-                        UserRepositoryImpl
-                    ]
-                )
-            ),
             auth_client=Depends(AuthClient),
     ):
-        self.rdb_uow = rdb_uow
         self.auth_client = auth_client
 
-    async def __call__(self, name: str, email: str, password: str):
-        # TODO: email, password 검증 필요
-
-        return await self.auth_client.register(
-            {
-                "name": name,
-                "email": email,
-                "password": password
-            }
+    async def __call__(self, refresh_token: str):
+        return await self.auth_client.refresh(
+            refresh_token=refresh_token
         )

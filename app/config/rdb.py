@@ -6,9 +6,9 @@ from .environment import env_config
 class RDBConfig(BaseSettings):
     """데이터베이스 설정"""
     HOST: str = "localhost"
+    NAME: str = ""
     PORT: int = 5432
     USER: str = "postgres"
-    NAME: str = ""
     PASSWORD: str = Field(..., min_length=1)
     SCHEMA: str = "public"
     POOL_SIZE: int = 10

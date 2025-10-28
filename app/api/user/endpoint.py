@@ -2,8 +2,8 @@ from uuid import UUID
 from http import HTTPStatus
 from fastapi import APIRouter, Depends
 
-from app.api.user.schema.reqest import SignUpRequest, SignInRequest
-from app.api.user.schema.response import SignUpResponse, SignInResponse
+from app.api.user.schema.reqest import SignUpRequest, SignInRequest, RefreshTokenRequest
+from app.api.user.schema.response import SignUpResponse, SignInResponse, RefreshTokenResponse
 from app.common.enums.user_status import UserLoginStatus
 from app.core.service import Service
 from app.core.service.user import *
@@ -56,6 +56,21 @@ async def check_info(
     service: Service = Depends(CheckUserService)
 ):
     return await service(user_id=user_id)
+
+
+@user_router.post(
+    name="user:refresh-token",
+    summary='토큰 갱신',
+    description='토큰 갱신 프로세스',
+    response_model=RefreshTokenResponse,
+    status_code=HTTPStatus.OK,
+    path='/refresh-token'
+)
+async def verify_refresh_token(
+    request: RefreshTokenRequest,
+    service: Service = Depends(VerifyRefreshTokenService)
+):
+    return await service(**request.dict())
 
 # @user_router.post(
 #     name="user:me",
